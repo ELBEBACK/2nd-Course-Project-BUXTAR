@@ -27,6 +27,10 @@ enum Modes {
     russian_roulete_2 = 4
 };
 
+bool is_mode_selected = 0;
+int mode;
+int currentStateCLK;                 
+
 EncoderControl encoder (SW_PIN, DT_PIN, CLK_PIN);
 LedsControl    leds    (LED_PIN, COUNT_LED);
 DisplayControl display (SCL_PIN, SDA_PIN);
@@ -38,14 +42,15 @@ void setup() {
   
   //эта хуета только здесь не трогать!!!!!
   display.lcd.init();                     
-  display.lcd.backlight();
+  //display.lcd.backlight();
   display.lcd.setCursor(10, 2);
   display.lcd.print("setup");
   //-----------------------------------
   leds.pixels.begin();
   leds.pixels.show();
   //-----------------------------------
-  //encoder.setLastCLK(digitalRead(CLK_PIN));
+  encoder.setLastCLK(digitalRead(CLK_PIN));
+  //lastStateCLK = digitalRead(CLK_PIN);
   //-----------------------------------
   Serial.print("Zero factor: ");
   Serial.println(scale1.zero_factor);
@@ -54,6 +59,11 @@ void setup() {
   Serial.println("s - ScaleControl");
   Serial.println("q - to return to the menu");
 
+  display.lcd.clear();
+  display.lcd.setCursor(1, 0);
+  display.lcd.print("Select mode");
+  display.lcd.setCursor(1, 1);
+  display.lcd.print("via encoder");
 }
 
 void loop() {
@@ -63,30 +73,46 @@ void loop() {
   leds.pixels.show();*/
 
   //-------------------------------------------------------------------
-  display.lcd.setCursor(1, 0);
-  display.lcd.print("Select mode");
-  display.lcd.setCursor(1, 1);
-  display.lcd.print("via encoder");
 
-  //int mode = encoder.SetMode(digitalRead(CLK_PIN));
-  //encoder.setLastCLK(digitalRead(CLK_PIN));
+  if(!is_mode_selected) {
+      currentStateCLK = digitalRead(CLK_PIN);
+      mode = encoder.SetMode(currentStateCLK);
 
-  /*switch(mode) {
-      case auto_mode:
-        display.lcd.print("Auto mode");
-        break;
-      case auto_same: 
-        display.lcd.print("Auto same mode");
-        break;
-      case russian_roulete_1: 
-        display.lcd.print("Russian roulete1");
-        break;
-      case russian_roulete_2: 
-        display.lcd.print("Russian roulete2");
-        break;
-      default: Serial.println("mode error");
-               Serial.println(mode);
-  }*/
+      Serial.println(mode);
+
+      if(mode != encoder.getLastMode()) {
+          switch(mode) {
+              case auto_mode:
+                display.lcd.clear();
+                display.lcd.print("mode 1");
+                break;
+              case auto_same: 
+                display.lcd.clear();
+                display.lcd.print("mode 2");
+                break;
+              case russian_roulete_1: 
+                display.lcd.clear();
+                display.lcd.print("mode 3");
+                break;
+              case russian_roulete_2: 
+                display.lcd.clear();
+                display.lcd.print("mode 4");
+                break;
+              default: Serial.println("mode error");
+                      Serial.println(mode);
+                      break;
+          }
+          encoder.setLastMode(mode);
+      }
+      encoder.setLastCLK(digitalRead(CLK_PIN));
+
+      encoder.buttonHandler(digitalRead(SW_PIN), &is_mode_selected);
+  }
+  //Serial.println(" | is mode selected ");
+  //Serial.println(is_mode_selected);
+  //Serial.println(" | mode ");
+  //Serial.println(mode);
+
   //-------------------------------------------------------------------
   if(Serial.available()) {
     char cmd = Serial.read();
@@ -109,8 +135,11 @@ void loop() {
       Serial.flush();
       esp_restart();
     }
+    else if (cmd == 'c') {
+      display.lcd.clear();
+    }
 
   }
  
-  delay(1000);
+  delay(1);
 }
