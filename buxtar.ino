@@ -3,10 +3,17 @@
 #include "displayControl.h"
 #include "ledsControl.h"
 #include "encoderControl.h"
+#include "servoControl.h"
 
 //scales
-#define HX711_DT 34
-#define HX711_SCK 13
+#define HX711_DT1 34
+#define HX711_SCK2 13
+#define HX711_DT1 34
+#define HX711_SCK2 13
+#define HX711_DT1 34
+#define HX711_SCK2 13
+#define HX711_DT1 34
+#define HX711_SCK2 13
 // pump
 #define IN1_PIN 12
 // display
@@ -19,6 +26,9 @@
 #define SW_PIN 32
 #define DT_PIN 33
 #define CLK_PIN 35
+//servo
+#define SERVO_PIN 23
+#define MOTOR_PIN 18 
 
 enum Modes {
     auto_mode         = 1,
@@ -36,6 +46,7 @@ LedsControl    leds    (LED_PIN, COUNT_LED);
 DisplayControl display (SCL_PIN, SDA_PIN);
 PumpControl    pump1   (IN1_PIN);
 TensoControl   scale1  (HX711_DT, HX711_SCK);
+ServoControl   servo   (SERVO_PIN, MOTOR_PIN);
 
 void setup() {
   Serial.begin(115200);
@@ -58,12 +69,14 @@ void setup() {
   Serial.println("p - PumpControl");
   Serial.println("s - ScaleControl");
   Serial.println("q - to return to the menu");
+  Serial.println("t - servo menu to turn servo");
 
   display.lcd.clear();
   display.lcd.setCursor(1, 0);
   display.lcd.print("Select mode");
   display.lcd.setCursor(1, 1);
   display.lcd.print("via encoder");
+
 }
 
 void loop() {
@@ -78,7 +91,7 @@ void loop() {
       currentStateCLK = digitalRead(CLK_PIN);
       mode = encoder.SetMode(currentStateCLK);
 
-      Serial.println(mode);
+      //Serial.println(mode);
 
       if(mode != encoder.getLastMode()) {
           switch(mode) {
@@ -137,9 +150,13 @@ void loop() {
     }
     else if (cmd == 'c') {
       display.lcd.clear();
+    } 
+    else if (cmd == 't')
+    {
+      servo.menu();
     }
 
   }
  
-  delay(1);
+  delay(1000);
 }
