@@ -21,5 +21,15 @@ public:
         //lcd.backlight();
         //Serial.println("Display is ready!");
     }
+
+    void printL1(const char* line) {
+        lcd.setCursor(0, 0);
+        lcd.print(line);
+    }
+    
+    void printL2(const char* line) {
+        lcd.setCursor(0, 1);
+        lcd.print(line);
+    }
 };
 #endif

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <HX711.h>
+#include <cmath>
 
 #define ReferenceWeight 55
 
@@ -18,11 +19,11 @@ public:
     long zero_factor;
 
     TensoControl(int dt, int sck) : HX711_DT(dt),
-                                    HX711_SCK(sck),
-                                    zero_factor(readHX711()) 
+                                    HX711_SCK(sck)
     {
         pinMode(HX711_SCK, OUTPUT);
         pinMode(HX711_DT, INPUT);
+        zero_factor = readHX711();
         //Serial.println("Scale is ready!");
     }
 
@@ -65,6 +66,27 @@ public:
             delay(1000);
             
         }
+    }
+
+    float calc_calibf() {
+        long tmp = readHX711();
+        calibration_factor = (tmp - zero_factor)/ReferenceWeight;
+        return calibration_factor;
+    }
+
+    float current_weight() {
+        long raw_value = readHX711();
+        float weight = raw_value - zero_factor) / calibration_factor;
+        return weight;
+    }
+
+    float tare() {
+        zero_factor = readHX711();
+            for (int i = 0; i < 9; ++i) {
+                zero_factor += readHX711();
+        }
+        zero_factor = zero_factor   / 10.0;
+        return zero_factor;
     }
 
     long readHX711() {

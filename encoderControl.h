@@ -1,15 +1,14 @@
 #ifndef ENCODER_H
 #define ENCODER_H
 
-#define NumModes 4
 
 class EncoderControl {
     int SW_PIN;
     int DT_PIN;
     int CLK_PIN;
 
-    int currentMode {0};
-    int lastMode {0};
+    int currentChoice {0};
+    int lastChoice {0};
     int currentStateCLK {0};
     int lastStateCLK {0};
 
@@ -24,36 +23,44 @@ public:
 
     void setLastCLK(int curr_clk) {lastStateCLK = curr_clk;}
     int getLastCLK () const {return lastStateCLK;}
-    int getLastMode() const {return lastMode;}
-    void setLastMode(int mode) {lastMode = mode;}
+    int getLastChoice() const {return lastChoice;}
+    void setLastChoice(int mode) {lastChoice = mode;}
 
-    int SetMode(int curr_clk) {
+    void resetChoice() {
+        currentChoice = 0;
+        lastChoice = 0;
+    }
+
+    int SetChoice(int curr_clk, int option_num) {
         if(curr_clk != lastStateCLK && curr_clk == 1) {
             if(digitalRead(DT_PIN) != curr_clk) {
-                currentMode++;                        
-                if(currentMode > NumModes) {
-                  currentMode = 1;
+                currentChoice++;                        
+                if(currentChoice > option_num) {
+                  currentChoice = 1;
                 }
             } else {
-                currentMode--;
-                if(currentMode <= 0) {
-                  currentMode = NumModes;
+                currentChoice--;
+                if(currentChoice <= 0) {
+                  currentChoice = option_num;
                 }
             }
             Serial.println(" | Mode: ");
-            Serial.println(currentMode);
+            Serial.println(currentChoice);
         }
         
-        return currentMode;
+        return currentChoice;
     }
 
-    void buttonHandler(int buttonState, bool* flag) {
+    bool buttonHandler(int buttonState) {
         if(buttonState == LOW) {
             if(millis() - lastButtonPress > 50) {
-                *flag = !(*flag);
+                lastButtonPress = millis();
+                delay(200);
+                return true;
             }
             lastButtonPress = millis();
         }
+        return false;
     }
 };
 

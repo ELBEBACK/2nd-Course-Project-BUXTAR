@@ -10,8 +10,6 @@ class ServoControl {
     int SERVO_PIN;
     int MOTOR_PIN;
 
-    const int angles[5] = {0, 30, 75, 115, 155};
-
 public:
     ServoControl(int Spin, int Mpin) : SERVO_PIN(Spin),
                                 MOTOR_PIN(Mpin),
@@ -22,6 +20,8 @@ public:
         analogWrite(MOTOR_PIN, 255);
     }
 
+    const int angles[5] = {0, 30, 75, 115, 155};
+    
     
     void menu() {
         
