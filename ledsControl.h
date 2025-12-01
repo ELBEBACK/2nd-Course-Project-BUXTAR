@@ -16,9 +16,9 @@ public:
                                               NUM_LEDS(count_led),
                                               strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800)
     {
-      strip.begin();
-      strip.show();
-      strip.setBrightness(BRIGHTNESS);
+      //strip.begin();
+      //strip.show();
+      //strip.setBrightness(BRIGHTNESS);
     };
 
     void allOff() {
@@ -56,14 +56,14 @@ public:
       for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
         strip.setPixelColor(i, colour);
         strip.show();
-        delay(20);
+        delay(10);
       }
     }
 
     void circleUnoOff(int circnum) {
       for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
         turnOffLED(i);
-        delay(20);
+        delay(5);
       }
     }
 

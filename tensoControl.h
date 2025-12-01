@@ -76,7 +76,7 @@ public:
 
     float current_weight() {
         long raw_value = readHX711();
-        float weight = raw_value - zero_factor) / calibration_factor;
+        float weight = (raw_value - zero_factor) / calibration_factor;
         return weight;
     }
 

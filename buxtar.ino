@@ -1,7 +1,7 @@
 #include "pumpControl.h"
 #include "tensoControl.h"
 #include "displayControl.h"
-//#include "ledsControl.h"
+#include "ledsControl.h"
 #include "encoderControl.h"
 #include "servoControl.h"
 #include <string>
@@ -35,16 +35,38 @@
 /////////FIRST LEVEL//////////
 enum Modes {
     auto_mode           = 1,
-    auto_same           = 2,
-    russian_roulette_1  = 3,
-    russian_roulette_2  = 4,
-    scaling             = 5,
-    servomotor          = 6,
-    pumping             = 7,
+    russian_roulette  = 2,
+    manual_mode         = 3,
+    captcha             = 4,
 };
 //////////////////////////////
 
 ////////SECOND LEVEL//////////
+enum Auto {
+    autoPos1               = 1,
+    autoPos2               = 2,
+    autoPos3               = 3,
+    autoPos4               = 4,
+    quitAuto               = 5,
+};
+
+enum ManualModes {
+    scaling             = 1,
+    servomotor          = 2,
+    pumping             = 3,
+    reset               = 4,
+    reboot              = 5,
+    quitMM              = 6,
+};
+
+/////////THIRD LEVEL//////////
+//////////editing/////////////
+enum AutoEditing {
+    proportions         = 1,
+    volume              = 2,
+    quitAE              = 3,
+};
+
 //////////scaling/////////////
 enum ChoiceOfScales {
     firstS              = 1,
@@ -97,14 +119,18 @@ enum PumpingOptions {
 //1st lvl
 bool is_mode_selected             = 0;
 //2nd lvl
-bool is_submode_selected          = 1;
+bool is_automode_selected         = 1;
+bool is_russian_roulette_selected = 1;
+bool is_manual_selected           = 1;
+bool is_captcha_selected          = 1;
+//3rd lvl 
 bool is_scaling_submenu_selected  = 1;
 bool is_servo_submenu_selected    = 1;
 bool is_pump_submenu_selected     = 1;
-//3rd lvl 
+//4th lvl
 bool is_scale_selected            = 1;
 bool is_pump_selected             = 1;
-//4th lvl
+//5th lvl
 bool is_time_set                  = 1;
 
 
@@ -113,7 +139,7 @@ int currentStateCLK;
 
 
 EncoderControl encoder (SW_PIN, DT_PIN, CLK_PIN);
-//LedsControl    leds    (LED_PIN, COUNT_LED);
+LedsControl    leds    (LED_PIN, COUNT_LED);
 DisplayControl display (SCL_PIN, SDA_PIN);
 ServoControl   servo   (SERVO_PIN, MOTOR_PIN);
 PumpControl    pump[2]  = {
@@ -134,6 +160,10 @@ void setup() {
   display.lcd.init();                     
   display.lcd.backlight();
   //-----------------------------------
+  leds.strip.begin();
+  leds.strip.show();
+  leds.strip.setBrightness(50);
+  //-----------------------------------
   encoder.setLastCLK(digitalRead(CLK_PIN));
   //-----------------------------------
   Serial.print(" | Setup  ");
@@ -149,35 +179,23 @@ void loop() {
 
   if(!is_mode_selected) {
       currentStateCLK = digitalRead(CLK_PIN);
-      option = encoder.SetChoice(currentStateCLK, 7);
+      option = encoder.SetChoice(currentStateCLK, 4);
 
 
       if(option != encoder.getLastChoice()) {
           display.lcd.clear();
           switch(option) {
               case auto_mode:
-                display.lcd.print("mode 1");
+                display.printL1("Preset mode");
                 break;
-              case auto_same: 
-                display.lcd.print("mode 2");
+              case russian_roulette: 
+                display.printL1("Russian Roulette");
                 break;
-              case russian_roulette_1: 
-                display.lcd.print("mode 3");
+              case manual_mode: 
+                display.printL1("Manual control");
                 break;
-              case russian_roulette_2: 
-                display.lcd.print("mode 4");
-                break;
-              case scaling: 
-                display.printL1("Scaling   manual"); 
-                display.printL2("            mode");
-                break;
-              case servomotor: 
-                display.printL1("Servo     manual");
-                display.printL2("            mode");
-                break;
-              case pumping: 
-                display.printL1("Pumping   manual");
-                display.printL2("            mode");
+              case captcha: 
+                display.printL1("Soberity captcha");
                 break;
               default: 
                       Serial.println("mode error");
@@ -193,39 +211,25 @@ void loop() {
             display.lcd.clear();
             encoder.resetChoice();
             switch(option) {
-                  case auto_mode:
-                    display.lcd.print("Auto Mode");
-                    is_submode_selected = 0;  
-                    break;
-                  case auto_same: 
-                    display.lcd.print("Auto Mode");
-                    is_submode_selected = 0;
-                    break;
-                  case russian_roulette_1: 
-                    display.printL1("Russian");
-                    display.printL2("Roulette 1");
-                    is_submode_selected = 0;
-                    break;
-                  case russian_roulette_2:
-                    display.printL1("Russian");
-                    display.printL2("Roulette 2");
-                    is_submode_selected = 0; 
-                    break;
-                  case scaling: 
-                    display.printL1("Manual scaling");
-                    display.printL2("Choose from 1-4");
-                    is_scaling_submenu_selected = 0;
-                    break;
-                  case servomotor: 
-                    display.printL1("Manual rotation");
-                    display.printL2("Choose action");
-                    is_servo_submenu_selected = 0;
-                    break;
-                  case pumping: 
-                    display.printL1("Manual pumping");
-                    display.printL2("Choose from 1-2");
-                    is_pump_submenu_selected = 0;
-                    break;
+              case auto_mode:
+                display.printL1("Choose preset");
+                display.printL2("to edit");
+                is_automode_selected = 0;
+                break;
+              case russian_roulette: 
+                display.printL1("Russian Roulette");
+                is_russian_roulette_selected = 0;
+                break;
+              case manual_mode: 
+                display.printL1("Select & Control"); 
+                display.printL2("control");
+                is_manual_selected = 0;
+                break;
+              case captcha: 
+                display.printL1("Prove that you");
+                display.printL2("are sober enough");
+                is_captcha_selected = 0;
+                break;
                   default: Serial.println("mode error");
                           Serial.println(option);
                           break;
@@ -233,6 +237,91 @@ void loop() {
           }
   }
 
+  if(!is_manual_selected) {
+      currentStateCLK = digitalRead(CLK_PIN);
+      option = encoder.SetChoice(currentStateCLK, 6);
+
+
+      if(option != encoder.getLastChoice()) {
+          display.lcd.clear();
+          switch(option) {
+              case scaling:
+                display.printL1("Scaling   manual"); 
+                display.printL2("            mode");
+                break;
+              case servomotor: 
+                display.printL1("Servo     manual");
+                display.printL2("            mode");
+                break;
+              case pumping: 
+                display.printL1("Pumping   manual");
+                display.printL2("            mode");
+                break;
+              case reset: 
+                display.printL1("To perform ");
+                display.printL2("software reset");
+                break;
+              case reboot: 
+                display.printL1("To perform ");
+                display.printL2("chip reboot");
+                break;
+              case quitMM: 
+                display.printL1("Back");
+                break;
+              default: 
+                      Serial.println("mode error");
+                      Serial.println(option);
+                      break;
+          }
+          encoder.setLastChoice(option);
+      }
+      encoder.setLastCLK(digitalRead(CLK_PIN));
+
+          if (encoder.buttonHandler(digitalRead(SW_PIN))) {
+            is_manual_selected = 1;
+            display.lcd.clear();
+            encoder.resetChoice();
+            switch(option) {
+              case scaling:
+                display.printL1("Manual scaling");
+                display.printL2("Choose from 1-4");
+                is_scaling_submenu_selected = 0;
+                break;
+              case servomotor: 
+                display.printL1("Manual rotation");
+                display.printL2("Choose action");
+                is_servo_submenu_selected = 0;
+                break;
+              case pumping: 
+                display.printL1("Manual pumping");
+                display.printL2("Choose from 1-2");
+                is_pump_submenu_selected = 0;
+                break;
+              case reset: 
+                display.printL1("Software"); 
+                display.printL2("restart...");
+                delay(100);
+                display.lcd.clear();
+                ESP.restart();
+                break;
+              case reboot: 
+                display.printL1("Full chip"); 
+                display.printL2("restart...");
+                delay(100);
+                display.lcd.clear();
+                esp_restart();
+                break;
+              case quitMM: 
+                display.printL1("Back to"); 
+                display.printL2("main menu");
+                is_mode_selected = 0;
+                break;
+                  default: Serial.println("mode error");
+                          Serial.println(option);
+                          break;
+            }
+          }
+  }
 
 
   else if (!is_scaling_submenu_selected) {
@@ -245,45 +334,45 @@ void loop() {
           switch(option) {
               case firstS:
                 display.printL1("Scale 1");
-                /*leds.circleUno(1, leds.strip.Color(50, 0, 50));
-                for (int i = 0; i < 4; ++i) {
-                  if(leds.isLEDOn(24 * i) && i != 1) {
+                leds.circleUno(4, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 4) {
                     leds.circleUnoOff(i);
                   }
-                }*/
+                }
                 break;
               case secondS: 
                 display.printL1("Scale 2");
-                /*leds.circleUno(2, leds.strip.Color(50, 0, 50));
-                for (int i = 0; i < 4; ++i) {
-                  if(leds.isLEDOn(24 * i) && i != 2) {
+                leds.circleUno(3, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 3) {
                     leds.circleUnoOff(i);
                   }
-                }*/
+                }
                 break;
               case thirdS: 
                 display.printL1("Scale 3");
-                /*for (int i = 0; i < 4; ++i) {
-                  if(leds.isLEDOn(24 * i) && i != 3) {
+                leds.circleUno(2, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 2) {
                     leds.circleUnoOff(i);
                   }
-                }*/
+                }
                 break;
               case fourthS: 
                 display.printL1("Scale 4");
-                /*for (int i = 0; i < 4; ++i) {
-                  if(leds.isLEDOn(24 * i) && i != 4) {
+                leds.circleUno(1, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 1) {
                     leds.circleUnoOff(i);
                   }
-                }*/
+                }
                 break;
               case quitCOS: 
                 display.printL1("Back");
-                /*for (int i = 0; i < 4; ++i) {
-                  if(leds.isLEDOn(24 * i)) {
+                for (int i = 4; i > 0; --i) {
                     leds.circleUnoOff(i);
-                  }
-                }*/
+                }
                 break;
               default: Serial.println("mode error");
                       Serial.println(option);
@@ -319,9 +408,10 @@ void loop() {
                 display.printL2("Choose action");
                 which_scale = 4;
                 break;
-            case quitCOS: 
-                display.printL1("Main menu");
-                is_mode_selected = 0;
+            case quitCOS:
+                display.printL1("Back to"); 
+                display.printL2("manual menu");
+                is_manual_selected = 0;
                 is_scale_selected = 1;
                 break;
             default: Serial.println("mode error");
@@ -404,21 +494,53 @@ void loop() {
               case firstPos:
                 display.printL1("Turn until ");
                 display.printL2("first position");
+
+                leds.circleUno(4, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 4) {
+                    leds.circleUnoOff(i);
+                  }
+                }
                 break;
               case secondPos:
                 display.printL1("Turn until ");
                 display.printL2("second position");
+
+                leds.circleUno(3, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 3) {
+                    leds.circleUnoOff(i);
+                  }
+                }
                 break;
               case thirdPos: 
                 display.printL1("Turn until");
                 display.printL2("third position");
+
+                leds.circleUno(2, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 2) {
+                    leds.circleUnoOff(i);
+                  }
+                }
                 break;
               case fourthPos: 
                 display.printL1("Turn until");
                 display.printL2("fourth position");
+
+                leds.circleUno(1, leds.strip.Color(50, 0, 50));
+                for (int i = 4; i > 0; --i) {
+                  if(i != 1) {
+                    leds.circleUnoOff(i);
+                  }
+                }
                 break;
               case home: 
                 display.printL1("Get back home");
+
+                for (int i = 4; i > 0; --i) {
+                    leds.circleUnoOff(i);
+                }
                 break;
               case quitSP:
                 display.printL1("Back");
@@ -456,8 +578,9 @@ void loop() {
                 servo.turn(servo.angles[0]);
                 break;
               case quitSP:
-                display.printL1("Main menu");
-                is_mode_selected = 0;
+                display.printL1("Back to"); 
+                display.printL2("manual menu");
+                is_manual_selected = 0;
                 is_servo_submenu_selected = 1;
                 break;
               default: Serial.println("mode error");
@@ -519,7 +642,7 @@ void loop() {
                 break;
               case quitCOP: 
                 display.printL1("Main menu");
-                is_mode_selected = 0;
+                is_manual_selected = 0;
                 is_pump_selected = 1;
                 break;
               default: Serial.println("mode error");
@@ -678,63 +801,6 @@ void loop() {
       }
   }
   
-
-  /*if(Serial.available()) {
-    char cmd = Serial.read();
-    
-    if(cmd == 'p') {
-      pump1.menu();
-    }
-    else if(cmd == 's') {
-      Serial.println("Menu:");
-      Serial.println("Choose the scale:   1-4");
-      delay(1000);
-        if(Serial.available()) {
-          char tens = Serial.read();
-      
-          switch(tens) {
-            case '1':
-              Serial.println("The first scale is chosen");
-              scale1.menu();
-              break;
-            case '2':
-              Serial.println("The second scale is chosen");
-              scale2.menu();
-              break;
-            case '3':
-              Serial.println("The third scale is chosen");
-              scale3.menu();
-              break;
-            case '4':
-              Serial.println("The fourth scale is chosen");
-              scale4.menu();
-              break;
-            case 'q':
-              break;
-          }  
-      }
-    }
-    else if (cmd == 'r') {
-      Serial.println("> Performing software restart...");
-      delay(100);
-      Serial.flush();
-      ESP.restart();
-    } 
-    else if (cmd == 'b') {
-      Serial.println("> Performing full chip restart...");
-      delay(100);
-      Serial.flush();
-      esp_restart();
-    }
-    else if (cmd == 'c') {
-      display.lcd.clear();
-    } 
-    else if (cmd == 't')
-    {
-      servo.menu();
-    }
-
-  }*/
  
   delay(1);
 }

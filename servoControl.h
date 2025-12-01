@@ -19,8 +19,8 @@ public:
         servo_.attach(SERVO_PIN);
         analogWrite(MOTOR_PIN, 255);
     }
-
-    const int angles[5] = {0, 30, 75, 115, 155};
+    
+    const int angles[5] = {0, 155, 115, 75, 30};
     
     
     void menu() {
