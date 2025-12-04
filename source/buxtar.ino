@@ -7,6 +7,8 @@
 #include "buttonControl.h"
 #include <string>
 
+
+
 //scales
 #define HX711_DT1 34
 #define HX711_SCK1 13
@@ -647,7 +649,7 @@ void loop() {
 
           switch(option) {
                 case 1:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 0;
                   is_prop_selected |= (1u << (which_auto_pos - 1));
@@ -655,7 +657,7 @@ void loop() {
                   is_automode_selected = 0;
                   break;
                 case 2:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 20;
                   is_prop_selected |= (1u << (which_auto_pos - 1));
@@ -663,7 +665,7 @@ void loop() {
                    is_automode_selected = 0;
                   break;
                 case 3:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 40;
                   is_prop_selected |= (1u << (which_auto_pos - 1));
@@ -671,7 +673,7 @@ void loop() {
                   is_automode_selected = 0;
                   break;
                 case 4:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 60;
                   is_prop_selected |= (1u << (which_auto_pos - 1));
@@ -679,7 +681,7 @@ void loop() {
                   is_automode_selected = 0;
                   break;
                 case 5:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 80;
                    is_prop_selected |= (1u << (which_auto_pos - 1));
@@ -687,7 +689,7 @@ void loop() {
                    is_automode_selected = 0;
                    break;
                 case 6:
-                  display.printL1("Proportion"); 
+                  display.printL1("Proportion");
                   display.printL2("selected");
                   auto_set[which_auto_pos - 1].first_proportion = 100;
                   is_prop_selected |= (1u << (which_auto_pos - 1));
