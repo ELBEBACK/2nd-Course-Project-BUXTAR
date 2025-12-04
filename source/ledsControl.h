@@ -59,11 +59,23 @@ public:
         delay(10);
       }
     }
+    void circleUnoInstant(int circnum, uint32_t colour) {
+      for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
+        strip.setPixelColor(i, colour);
+        strip.show();
+      }
+    }
 
     void circleUnoOff(int circnum) {
       for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
         turnOffLED(i);
         delay(5);
+      }
+    }
+
+    void circleUnoOffInstant(int circnum) {
+      for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
+        turnOffLED(i);
       }
     }
 

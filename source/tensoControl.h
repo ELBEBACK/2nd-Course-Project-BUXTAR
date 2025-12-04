@@ -21,10 +21,16 @@ public:
     TensoControl(int dt, int sck) : HX711_DT(dt),
                                     HX711_SCK(sck)
     {
+        //pinMode(HX711_SCK, OUTPUT);
+        //pinMode(HX711_DT, INPUT);
+        //zero_factor = readHX711();
+        //Serial.println("Scale is ready!");
+    }
+
+    void init() {
         pinMode(HX711_SCK, OUTPUT);
         pinMode(HX711_DT, INPUT);
         zero_factor = readHX711();
-        //Serial.println("Scale is ready!");
     }
 
     void menu() {
@@ -69,23 +75,28 @@ public:
     }
 
     float calc_calibf() {
-        long tmp = readHX711();
-        calibration_factor = (tmp - zero_factor)/ReferenceWeight;
+        int32_t tmp = readHX711();
+        float denom = ReferenceWeight;
+        float f = (tmp - zero_factor) / denom;
+        if (fabsf(f) < 1e-6f) f = 1.0f;   
+        calibration_factor = f;
         return calibration_factor;
     }
 
     float current_weight() {
-        long raw_value = readHX711();
-        float weight = (raw_value - zero_factor) / calibration_factor;
-        return weight;
-    }
+    int32_t raw_value = readHX711();
+    if (fabsf(calibration_factor) < 1e-6f) return 0.0f;
+    return (raw_value - zero_factor) / calibration_factor;
+  }
 
-    float tare() {
-        zero_factor = readHX711();
-            for (int i = 0; i < 9; ++i) {
-                zero_factor += readHX711();
+    int32_t tare(uint8_t samples = 10) {
+        int64_t sum = 0;
+
+        for (uint8_t i = 0; i < samples; i++) {
+        sum += readHX711();
         }
-        zero_factor = zero_factor   / 10.0;
+
+        zero_factor = (int32_t)(sum / samples);
         return zero_factor;
     }
 
