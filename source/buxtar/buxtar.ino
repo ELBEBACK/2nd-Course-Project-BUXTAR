@@ -1,12 +1,11 @@
-#include "pumpControl.h"
-#include "tensoControl.h"
-#include "displayControl.h"
-#include "ledsControl.h"
-#include "encoderControl.h"
-#include "servoControl.h"
-#include "buttonControl.h"
+#include "../pumpControl.h"
+#include "../tensoControl.h"
+#include "../displayControl.h"
+#include "../ledsControl.h"
+#include "../encoderControl.h"
+#include "../servoControl.h"
 #include <string>
-
+#include "../buttonControl.h"
 
 
 //scales
@@ -135,7 +134,7 @@ struct auto_one_set {
     int first_proportion;
 };
 
-auto_one_set auto_set[4] = {};
+auto_one_set auto_set[4] = {{50, 0}, {50, 0}, {50, 0}, {50, 0}};
 //menu branch status
 //1st lvl
 bool is_mode_selected             = 0;  //
@@ -168,6 +167,7 @@ bool is_fourth_prop_selected = 1;
 
 bool is_volume_submenu_selected = 1;
 bool is_prop_menu_selected = 1;
+bool auto_mode_settings = 1;
 
 int is_vol_selected = 1;         //
 int is_prop_selected = 1;        //
@@ -402,7 +402,7 @@ void loop() {
         Serial.print(i);
         Serial.print(" | weight: ");
         Serial.println(cur_weight, 2);
-        if(abs(cur_weight) > 10.0) {
+        if(abs(cur_weight) > 15.0) {
             leds.circleUnoInstant(4-i, leds.strip.Color(50, 0, 50));
 
             if(buttons[i].wasPressed()) {
@@ -448,6 +448,58 @@ void loop() {
         }
     }
   } else if(!is_automode_selected) {
+      currentStateCLK = digitalRead(CLK_PIN);
+      option = encoder.SetChoice(currentStateCLK, 3);
+
+      if(option != encoder.getLastChoice()) {
+          display.lcd.clear();
+          switch(option) {
+              case 1:
+                display.printL1("Start with");
+                display.printL2("standart set");
+                break;
+              case 2:
+                display.printL1("Choose your");
+                display.printL2("preset");
+                break;
+              case 3: 
+                display.printL1("Back");
+                break;
+              default:
+                      Serial.println("mode error");
+                      Serial.println(option);
+                      break;
+          }
+          encoder.setLastChoice(option);
+      }
+      encoder.setLastCLK(digitalRead(CLK_PIN));
+
+          if (encoder.buttonHandler(digitalRead(SW_PIN))) {
+            display.lcd.clear();
+            encoder.resetChoice();
+            switch(option) {
+              case 1:
+                is_automode_selected = 1;
+                is_vol_selected = 15;
+                is_prop_selected = 15;
+                break;
+              case 2:
+                display.printL1("Position 1");
+                is_automode_selected = 1;
+                auto_mode_settings = 0;
+                break;
+              case 3:
+                display.printL2("via Encoder");
+                display.printL1("Select mode");
+                is_automode_selected = 1;
+                is_mode_selected = 0;
+                break;
+                  default: Serial.println("mode error");
+                          Serial.println(option);
+                          break;
+                }
+          }
+  } else if(!auto_mode_settings) {
 
       currentStateCLK = digitalRead(CLK_PIN);
       option = encoder.SetChoice(currentStateCLK, 5);
@@ -512,10 +564,10 @@ void loop() {
                 is_volume_submenu_selected = 0;
                 break;
               case 5:
-                display.printL2("via Encoder");
-                display.printL1("Select mode");
-                is_automode_selected = 1;
-                is_mode_selected = 0;
+                display.printL1("Start with");
+                display.printL2("standart set");
+                auto_mode_settings = 1;
+                is_automode_selected = 0;
                 break;
                   default: Serial.println("mode error");
                           Serial.println(option);
