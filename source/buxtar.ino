@@ -1,11 +1,11 @@
-#include "../pumpControl.h"
-#include "../tensoControl.h"
-#include "../displayControl.h"
-#include "../ledsControl.h"
-#include "../encoderControl.h"
-#include "../servoControl.h"
+#include "pumpControl.h"
+#include "tensoControl.h"
+#include "displayControl.h"
+#include "ledsControl.h"
+#include "encoderControl.h"
+#include "servoControl.h"
 #include <string>
-#include "../buttonControl.h"
+#include "buttonControl.h"
 
 
 //scales
@@ -41,43 +41,43 @@
 
 /////////FIRST LEVEL//////////
 enum Modes {
-    auto_mode           = 1,
-    russian_roulette    = 2,
-    manual_mode         = 3,
-    captcha             = 4,
+	auto_mode           = 1,
+	russian_roulette    = 2,
+	manual_mode         = 3,
+	captcha             = 4,
 };
 //////////////////////////////
 
 ////////SECOND LEVEL//////////
 enum Auto {
-    autoPos1               = 1,
-    autoPos2               = 2,
-    autoPos3               = 3,
-    autoPos4               = 4,
-    quitAuto               = 5,
+	autoPos1               = 1,
+	autoPos2               = 2,
+	autoPos3               = 3,
+	autoPos4               = 4,
+	quitAuto               = 5,
 };
 
 enum ManualModes {
-    scaling             = 1,
-    servomotor          = 2,
-    pumping             = 3,
-    reset               = 4,
-    reboot              = 5,
-    quitMM              = 6,
+	scaling             = 1,
+	servomotor          = 2,
+	pumping             = 3,
+	reset               = 4,
+	reboot              = 5,
+	quitMM              = 6,
 };
 
 /////////THIRD LEVEL//////////
 //////////editing/////////////
 enum Volume {
-    ml50   = 1,
-    ml100  = 2,
-    ml150  = 3,
-    ml200  = 4,
+	ml50   = 1,
+	ml100  = 2,
+	ml150  = 3,
+	ml200  = 4,
 };
 enum AutoEditing {
-    proportions         = 1,
-    volume              = 2,
-    quitAE              = 3,
+	proportions         = 1,
+	volume              = 2,
+	quitAE              = 3,
 };
 
 //////////scaling/////////////
@@ -202,6 +202,77 @@ ButtonControl  buttons[4] = {
 void dumpAutoSet(const auto_one_set* arr, size_t n,
                  uint8_t volMask, uint8_t propMask);
 
+void scaleSensitivity(void *param)  {
+    while (true) {
+      if ((is_vol_selected == 15) && (is_prop_selected == 15)) {
+        float cur_weight = 0;
+        for (int i = 0; i < 4; ++i) {
+          cur_weight = scale[i].current_weight();
+          if (abs(cur_weight) > 15.0) {
+            leds.circleUnoInstant(4 - i, leds.strip.Color(50, 0, 50));
+            if(buttons[i].wasPressed()) {
+                servo.turn(servo.angles[i + 1]);
+
+                float v1 = auto_set[i].volume * (auto_set[i].first_proportion / 100.0f);
+                float v2 = auto_set[i].volume * ((100.0f - auto_set[i].first_proportion) / 100.0f);
+                float tare_weight = scale[i].current_weight();
+                uint32_t t0 = millis();
+
+                pump[0].setPumpForward();
+                while(v1 > (scale[i].current_weight() - tare_weight)) {
+                  if (millis() - t0 > 20000) break;
+                  vTaskDelay(10);
+                }
+                pump[0].stopPump();
+
+                vTaskDelay(100);
+
+                tare_weight = scale[i].current_weight();
+                t0 = millis();
+                pump[1].setPumpForward();
+                while(v2 > (scale[i].current_weight() - tare_weight)) {
+                  if (millis() - t0 > 20000) break;
+                    vTaskDelay(10);
+                }
+                pump[1].stopPump();
+
+                servo.turn(0);
+            }
+          } else {
+            leds.circleUnoOffInstant(4 - i);
+          }
+        }
+    }
+
+    // Yield control to FreeRTOS so other tasks can run
+    vTaskDelay(100 / portTICK_PERIOD_MS);  // Delay for 100ms
+  }
+}
+
+int spot = 0, semnum = 0;
+void spotLights(void* param) {
+    while (true) {
+      if (is_scaling_submenu_selected || is_servo_submenu_selected) {
+        if (semnum) {
+          --semnum;
+          LEDTransition(spot);
+        }
+      }
+
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+}
+
+void LEDTransition(int position) {
+  if(position != 0) leds.circleUno(position, leds.strip.Color(50, 0, 50));
+  for (int i = 4; i > 0; --i) {
+    if(i != position) {
+      leds.circleUnoOff(i);
+    }
+  }
+}
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -220,6 +291,12 @@ void setup() {
       scale[i].init();
   }
 
+  if (xTaskCreate(scaleSensitivity, "Weight - LED", 2048, NULL, 1, NULL) != pdPASS) {
+    Serial.println("Failed to create RTOS");
+  }
+  if (xTaskCreate(spotLights, "Animated LED", 2048, NULL, 1, NULL) != pdPASS) {
+    Serial.println("Failed to create RTOS");
+  }
 
   display.lcd.clear();
   display.printL2("via Encoder");
@@ -234,7 +311,7 @@ void loop() {
       option = encoder.SetChoice(currentStateCLK, 3);
 
       if(option != encoder.getLastChoice()) {
-          display.lcd.clear();
+	      display.lcd.clear();
           switch(option) {
               case auto_mode:
                 display.printL1("Preset mode");
@@ -343,7 +420,7 @@ void loop() {
                 display.lcd.print(100 - auto_set[3].first_proportion);
                 break;
               case 5:
-                display.printL1("Exit");
+                display.printL1("Back");
                 break;
 
               default:
@@ -385,6 +462,8 @@ void loop() {
                   is_volume_submenu_selected = 0;
                   break;
                 case 5:
+                  display.printL1("Back to");
+                  display.printL2("main menu");
                   is_mode_selected = 0;
                   is_vol_selected = 0;
                   is_prop_selected = 0;
@@ -394,59 +473,6 @@ void loop() {
                         break;
           }
         }
-      //dumpAutoSet(auto_set, 4, is_vol_selected, is_prop_selected);
-      float cur_weight = 0;
-      for(int i = 0; i < 4; ++i){
-        cur_weight = scale[i].current_weight();
-        Serial.print(" | scale ");
-        Serial.print(i);
-        Serial.print(" | weight: ");
-        Serial.println(cur_weight, 2);
-        if(abs(cur_weight) > 15.0) {
-            leds.circleUnoInstant(4-i, leds.strip.Color(50, 0, 50));
-
-            if(buttons[i].wasPressed()) {
-                servo.turn(servo.angles[i + 1]);
-
-                float v1 = auto_set[i].volume * (auto_set[i].first_proportion / 100.0f);
-                float v2 = auto_set[i].volume * ((100.0f - auto_set[i].first_proportion) / 100.0f);
-                //with pump speed
-                /*pump[1].setPumpForward();
-                delay(v1 * first_pump_vol_per_sec * 1000);
-                pump[1].stopPump();
-
-                pump[2].setPumpForward();
-                delay(v2 * second_pump_vol_per_sec * 1000);
-                pump[2].stopPump();*/
-
-                //with tenzo
-                float tare_weight = scale[i].current_weight();
-                uint32_t t0 = millis();
-
-                pump[0].setPumpForward();
-                while(v1 > (scale[i].current_weight() - tare_weight)) {
-                  if (millis() - t0 > 20000) break;
-                  delay(10);
-                }
-                pump[0].stopPump();
-
-                delay(100);
-
-                tare_weight = scale[i].current_weight();
-                t0 = millis();
-                pump[1].setPumpForward();
-                while(v2 > (scale[i].current_weight() - tare_weight)) {
-                  if (millis() - t0 > 20000) break;
-                    delay(10);
-                }
-                pump[1].stopPump();
-
-                servo.turn(0);
-            }
-        } else {
-            leds.circleUnoOffInstant(4-i);
-        }
-    }
   } else if(!is_automode_selected) {
       currentStateCLK = digitalRead(CLK_PIN);
       option = encoder.SetChoice(currentStateCLK, 3);
@@ -477,21 +503,21 @@ void loop() {
           if (encoder.buttonHandler(digitalRead(SW_PIN))) {
             display.lcd.clear();
             encoder.resetChoice();
+            is_automode_selected = 1;
             switch(option) {
               case 1:
-                is_automode_selected = 1;
+                display.printL1("Default presets");
+                display.printL2("");
                 is_vol_selected = 15;
                 is_prop_selected = 15;
                 break;
               case 2:
-                display.printL1("Position 1");
-                is_automode_selected = 1;
+		            display.printL1("Position 1");
                 auto_mode_settings = 0;
                 break;
               case 3:
-                display.printL2("via Encoder");
-                display.printL1("Select mode");
-                is_automode_selected = 1;
+                display.printL1("Back to");
+                display.printL2("main menu");
                 is_mode_selected = 0;
                 break;
                   default: Serial.println("mode error");
@@ -948,45 +974,28 @@ void loop() {
           switch(option) {
               case firstS:
                 display.printL1("Scale 1");
-                leds.circleUno(4, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 4) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 4;
+                ++semnum;
                 break;
               case secondS:
                 display.printL1("Scale 2");
-                leds.circleUno(3, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 3) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 3;
+                ++semnum;
                 break;
               case thirdS:
                 display.printL1("Scale 3");
-                leds.circleUno(2, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 2) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 2;
+                ++semnum;
                 break;
               case fourthS:
                 display.printL1("Scale 4");
-                leds.circleUno(1, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 1) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 1;
+                ++semnum;
                 break;
               case quitCOS:
                 display.printL1("Back");
-                for (int i = 4; i > 0; --i) {
-                    leds.circleUnoOff(i);
-                }
+                spot = 0;
+                ++semnum;
                 break;
               default: Serial.println("mode error");
                       Serial.println(option);
@@ -1108,53 +1117,31 @@ void loop() {
               case firstPos:
                 display.printL1("Turn until ");
                 display.printL2("first position");
-
-                leds.circleUno(4, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 4) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 4;
+                ++semnum;
                 break;
               case secondPos:
                 display.printL1("Turn until ");
                 display.printL2("second position");
-
-                leds.circleUno(3, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 3) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 3;
+                ++semnum;
                 break;
               case thirdPos:
                 display.printL1("Turn until");
                 display.printL2("third position");
-
-                leds.circleUno(2, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 2) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 2;
+                ++semnum;
                 break;
               case fourthPos:
                 display.printL1("Turn until");
                 display.printL2("fourth position");
-
-                leds.circleUno(1, leds.strip.Color(50, 0, 50));
-                for (int i = 4; i > 0; --i) {
-                  if(i != 1) {
-                    leds.circleUnoOff(i);
-                  }
-                }
+                spot = 1;
+                ++semnum;
                 break;
               case home:
-                display.printL1("Get back home");
-
-                for (int i = 4; i > 0; --i) {
-                    leds.circleUnoOff(i);
-                }
+                display.printL1("Get servo back");
+                spot = 0;
+                ++semnum;
                 break;
               case quitSP:
                 display.printL1("Back");

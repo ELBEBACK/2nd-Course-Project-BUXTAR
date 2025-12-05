@@ -56,7 +56,7 @@ public:
       for (int i = 24 * (circnum - 1); i < 24 * circnum; ++i) {
         strip.setPixelColor(i, colour);
         strip.show();
-        delay(10);
+        delay(5);
       }
     }
     void circleUnoInstant(int circnum, uint32_t colour) {

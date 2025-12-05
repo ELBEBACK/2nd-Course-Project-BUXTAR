@@ -11,6 +11,7 @@
 - [How to use | Использование](#how-to-use)
 
 ---
+<a id="overview"></a>
 ## Overview | Описание
 
 ### **English**  
@@ -20,7 +21,7 @@ This project was created by **Fyodor Ivanov**, **Maxim Vanin** and **Elbek Begal
 Над проектом вели разработку **Иванов Фёдор**, **Ванин Максим** и **Бегалиев Эльбек**, проект представляет собой **портативного робота-бармена** в виде складного кейса с функцией смешивания двух жидкостей. Система использует **ESP32** микроконтроллер и различные компоненты, такие как тензодатчики, насосы и сервопривод, для автоматизации процесса смешивания.
 
 ---
-
+<a id="components"></a>
 ## Components | Компоненты
 
 ### **English**  
@@ -48,7 +49,7 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 - **Светодиодные кольца**
 
 ---
-
+<a id="startup-requirements"></a>
 ## Startup Requirements | Требования запуска
 
 ### **English**  
