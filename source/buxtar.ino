@@ -488,7 +488,7 @@ void loop() {
                 display.printL1("Choose your");
                 display.printL2("preset");
                 break;
-              case 3: 
+              case 3:
                 display.printL1("Back");
                 break;
               default:
@@ -702,7 +702,7 @@ void loop() {
                 break;
               case 5:
                 display.printL1("Select ratio");
-                display.printL2("       80% | 100%");
+                display.printL2("       80% | 20%");
                 break;
               case 6:
                 display.printL1("Select ratio");
