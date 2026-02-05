@@ -2,7 +2,7 @@
 # Dispenser - Diluter | Наливатор - Разбавлятор
 
 
-![Project Logo](/images/logo.jpg)
+![Project Logo](/assets/branding/logo.jpg)
 
 ## Table of Contents | Содержание
 - [Project Description | Описание проекта](#overview)
