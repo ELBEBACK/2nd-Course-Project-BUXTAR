@@ -8,7 +8,7 @@
 - [Project Description | Описание проекта](#overview)
 - [Project Components | Проект содержит](#components)
 - [Startup Requirements | Требования запуска](#startup-requirements)
-- [How to use | Использование](#how-to-use)
+- [Product shots | Фото изделия](#images)
 
 ---
 <a id="overview"></a>
@@ -63,5 +63,9 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 - [Любые дополнительные библиотеки или зависимости для датчиков или дисплеев]
 
 ---
+<a id="images"></a>
+## Product shots | Фото изделия
 
-
+![Preview](/assets/images/overview.jpeg)
+![Front closed](/assets/images/frontview.jpeg)
+![Back closed](/assets/images/backside.jpeg)
