@@ -15,7 +15,7 @@
 ## Overview | Описание
 
 ### **English**  
-This project was created by **Fedor Ivanov**, **Maxim Vanin** and **Elbek Begaliev** as a **portable robot-bartender** in the form of a folding case with the ability to mix two liquids. The system uses an **ESP32** microcontroller and various components such as load cells, pumps, and a servo to automate the mixing process.
+This project was developed by **Fedor Ivanov**, **Maxim Vanin** and **Elbek Begaliev** as a **portable robot-bartender** in the form of a folding case with the ability to mix two liquids. The system uses an **ESP32** microcontroller and various components such as load cells, pumps, and a servo to automate the mixing process.
 
 ### **Русский**  
 Над проектом вели разработку **Иванов Фёдор**, **Ванин Максим** и **Бегалиев Эльбек**, проект представляет собой **портативного робота-бармена** в виде складного кейса с функцией смешивания двух жидкостей. Система использует **ESP32** микроконтроллер и различные компоненты, такие как тензодатчики, насосы и сервопривод, для автоматизации процесса смешивания.
