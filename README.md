@@ -20,6 +20,7 @@ This project was developed by **Fedor Ivanov**, **Maxim Vanin** and **Elbek Bega
 ### **Русский**  
 Над проектом вели разработку **Иванов Фёдор**, **Ванин Максим** и **Бегалиев Эльбек**, проект представляет собой **портативного робота-бармена** в виде складного кейса с функцией смешивания двух жидкостей. Система использует **ESP32** микроконтроллер и различные компоненты, такие как тензодатчики, насосы и сервопривод, для автоматизации процесса смешивания.
 
+![Presentaion](/assets/images/presentation.jpeg)
 ---
 <a id="components"></a>
 ## Components | Компоненты
@@ -66,6 +67,6 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 <a id="images"></a>
 ## Product shots | Фото изделия
 
-![Preview](/assets/images/overview.jpeg)
+![Preview](/assets/images/preview.jpeg)
 ![Front closed](/assets/images/frontview.jpeg)
 ![Back closed](/assets/images/backside.jpeg)
