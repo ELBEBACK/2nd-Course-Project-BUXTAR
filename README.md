@@ -9,6 +9,7 @@
 - [Project Components | Проект содержит](#components)
 - [Startup Requirements | Требования запуска](#startup-requirements)
 - [Product shots | Фото изделия](#images)
+- [External links | Ссылки](#external-links)
 
 ---
 <a id="overview"></a>
@@ -48,6 +49,7 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 - **Кнопки без фиксации**
 - **LCD экран 16x2**
 - **Светодиодные кольца**
+![Inner parts](/assets/images/inwards.jpeg)
 
 ---
 <a id="startup-requirements"></a>
@@ -70,3 +72,10 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 ![Preview](/assets/images/preview.jpeg)
 ![Front closed](/assets/images/frontview.jpeg)
 ![Back closed](/assets/images/backside.jpeg)
+
+---
+<a id="external-links"></a>
+## External links | Ссылки
+
+- 📢 [Telegram Channel](https://t.me/+ZIgipN4O5QU5ZDY6) | [Телеграм-канал](https://t.me/+ZIgipN4O5QU5ZDY6)
+- 👥 Fedor Ivanov | Фёдор Иванов: [@Freddy_bears](https://t.me/Freddy_bears)
