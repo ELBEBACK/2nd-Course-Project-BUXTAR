@@ -6,13 +6,12 @@ class ButtonControl {
     volatile bool stableState = HIGH;
     bool prevStableState = HIGH;
     
-    // Static member pointing to instance
     static ButtonControl* instance;
 
 public:
     ButtonControl(int pin) : IN_PIN(pin) {
         pinMode(pin, INPUT_PULLUP);
-        instance = this;  // Save current instance
+        instance = this; 
     }
 
     static void IRAM_ATTR buttonInterrupt() {
@@ -42,7 +41,6 @@ public:
     }
 };
 
-// Initialize static member outside the class
 ButtonControl* ButtonControl::instance = nullptr;
 
 #endif
