@@ -637,6 +637,7 @@ void loop() {
 
           if (encoder.buttonHandler(digitalRead(SW_PIN))) {
           display.lcd.clear();
+
           encoder.resetChoice();
 
           switch(option) {
