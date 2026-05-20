@@ -69,6 +69,7 @@ The project uses the **ESP32** microcontroller and incorporates various componen
 <a id="images"></a>
 ## Product shots | Фото изделия
 
+
 ![Preview](/assets/images/preview.jpeg)
 ![Front closed](/assets/images/frontview.jpeg)
 ![Back closed](/assets/images/backside.jpeg)
